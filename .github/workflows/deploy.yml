@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npx next lint --dir src || true
 
   test:
@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npx jest --passWithNoTests --ci 2>/dev/null || echo "no tests"
 
   build:

@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_BACKEND:  ghcr.io/${{ github.repository_owner }}/assessment-backend
-  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/assessment-frontend
+  IMAGE_BACKEND:  ghcr.io/pok1s/assessment-backend
+  IMAGE_FRONTEND: ghcr.io/pok1s/assessment-frontend
 
 jobs:
   lint:

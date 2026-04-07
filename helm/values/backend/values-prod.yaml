@@ -1,0 +1,17 @@
+controller:
+  replicas: 3
+
+autoscaling:
+  minReplicas: 3
+  maxReplicas: 12
+
+image:
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: assessment
+data:
+  NODE_ENV: production
+  PORT: "4000"
+  JWT_EXPIRE: "7d"
+  COOKIE_EXPIRE: "5"

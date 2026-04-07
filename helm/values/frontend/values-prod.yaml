@@ -1,0 +1,29 @@
+controller:
+  replicas: 3
+
+autoscaling:
+  minReplicas: 3
+  maxReplicas: 10
+
+image:
+  pullPolicy: IfNotPresent
+
+ingress:
+  main:
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/limit-rps: "50"
+    hosts:
+      - host: test.com
+        paths:
+          - path: /
+            pathType: Prefix
+          - path: /api
+            pathType: Prefix
+            service:
+              name: backend
+              port: 4000
+    tls:
+      - secretName: app-tls-secret
+        hosts:
+          - test.com

@@ -1,0 +1,4 @@
+{{- $all := include "common.all" . -}}
+{{- if $all -}}
+{{- $all | trimSuffix "\n" -}}
+{{- end -}}

@@ -1,0 +1,98 @@
+nameOverride: backend
+fullnameOverride: backend
+
+controller:
+  replicas: 2
+  strategy: RollingUpdate
+  rollingUpdate:
+    surge: 1
+    unavailable: 0
+
+image:
+  repository: ghcr.io/test/assessment-backend
+  tag: latest
+  pullPolicy: Always
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+
+env:
+  NODE_ENV: production
+  PORT: "4000"
+  JWT_EXPIRE: "7d"
+  MONGO_URI:
+    valueFrom:
+      secretKeyRef:
+        name: mongodb-secret
+        key: MONGO_URI
+  JWT_SECRET:
+    valueFrom:
+      secretKeyRef:
+        name: backend-secret
+        key: JWT_SECRET
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  liveness:
+    enabled: true
+    custom: true
+    spec:
+      httpGet:
+        path: /
+        port: 4000
+      initialDelaySeconds: 20
+      periodSeconds: 15
+      failureThreshold: 3
+  readiness:
+    enabled: true
+    custom: true
+    spec:
+      httpGet:
+        path: /
+        port: 4000
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 3
+  startup:
+    enabled: false
+
+service:
+  main:
+    enabled: true
+    ports:
+      http:
+        enabled: true
+        primary: true
+        port: 4000
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+initContainers:
+  wait-mongodb:
+    image: mongo:7-jammy
+    command:
+      - sh
+      - -c
+      - |
+        until mongosh "$MONGO_URI" --eval "db.adminCommand('ping')" --quiet; do
+          sleep 3
+        done
+    env:
+      MONGO_URI:
+        valueFrom:
+          secretKeyRef:
+            name: mongodb-secret
+            key: MONGO_URI

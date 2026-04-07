@@ -1,0 +1,30 @@
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN apk add --no-cache python3 py3-setuptools make g++ \
+ && npm install && npm cache clean --force
+
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY src/ ./src/
+COPY public/ ./public/
+COPY next.config.js next-i18next.config.js tailwind.config.js tsconfig.json package*.json ./
+RUN find ./src -name "*.tsx" -o -name "*.ts" | xargs grep -l "Link.*passHref.*rel=\"icon\"" | \
+    xargs sed -i 's|<Link passHref rel="icon" href="\([^"]*\)" />|<link rel="icon" href="\1" />|g'
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+RUN apk add --no-cache wget \
+ && addgroup -S nodejs && adduser -S nextjs -G nodejs
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json /app/next.config.js /app/next-i18next.config.js ./
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+USER nextjs
+EXPOSE 3002
+STOPSIGNAL SIGTERM
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget -qO- http://localhost:3002/ || exit 1
+CMD ["node_modules/.bin/next", "start", "--port", "3002"]

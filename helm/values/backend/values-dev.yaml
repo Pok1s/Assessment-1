@@ -1,0 +1,13 @@
+controller:
+  replicas: 1
+
+autoscaling:
+  enabled: false
+
+env:
+  NODE_ENV: development
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi

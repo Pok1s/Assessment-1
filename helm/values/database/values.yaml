@@ -1,0 +1,68 @@
+nameOverride: mongodb
+fullnameOverride: mongodb
+
+controller:
+  type: statefulset
+
+image:
+  repository: mongo
+  tag: "7-jammy"
+  pullPolicy: IfNotPresent
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+envFrom:
+  - secretRef:
+      name: mongodb-secret
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  liveness:
+    enabled: true
+    custom: true
+    spec:
+      exec:
+        command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+      initialDelaySeconds: 30
+      periodSeconds: 20
+      failureThreshold: 3
+  readiness:
+    enabled: true
+    custom: true
+    spec:
+      exec:
+        command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      failureThreshold: 3
+  startup:
+    enabled: false
+
+service:
+  main:
+    enabled: true
+    ports:
+      mongodb:
+        enabled: true
+        primary: true
+        port: 27017
+        protocol: TCP
+
+volumeClaimTemplates:
+  - name: mongo-data
+    mountPath: /data/db
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+autoscaling:
+  enabled: false

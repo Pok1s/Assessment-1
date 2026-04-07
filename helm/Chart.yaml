@@ -1,0 +1,10 @@
+apiVersion: v2
+name: assessment-service
+description: Wrapper around the common library chart. One release = one service.
+type: application
+version: 1.0.0
+kubeVersion: ">=1.16.0-0"
+dependencies:
+  - name: common
+    version: "7.6.3"
+    repository: "file://charts/common"
